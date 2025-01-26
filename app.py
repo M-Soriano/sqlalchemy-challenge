@@ -64,12 +64,20 @@ def precipitation():
     most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()
     one_year_ago= dt.datetime.strptime(most_recent_date[0],"%Y-%m-%d") - dt.timedelta(days=365)
     precipitation_data=session.query(measurement.date, measurement.prcp).filter(measurement.date >= one_year_ago).all()
+
+    session.close()
     
     #covertquery to dictionary 
-    perc_data= {date: prcp for date, prcp in precipitation_data}
-    return jsonify(perc_data)
+    perc_data_dict= {date: prcp for date, prcp in precipitation_data}
+    return jsonify(perc_data_dict)
 
-@app.route(/api/v1.0/stations)
+@app.route('/api/v1.0/stations')
+def stations():
+    stationlist=session.query((func.distinct(station.station))).all()
+    #converting to list
+    station_data_list=[station[0] for station in stationlist]
+
+    return jsonify(station_data_list)
 
 
 
