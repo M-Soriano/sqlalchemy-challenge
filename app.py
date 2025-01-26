@@ -13,8 +13,7 @@ from sqlalchemy import create_engine, func
 #################################################
 # Database Setup
 #################################################
-engine= create_engine('sqlite:///hawaii.sqlite')
-
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base= automap_base()
@@ -47,32 +46,32 @@ def root():#helpful https://python-web.teclado.com/section07/lectures/02_render_
     <html>
     <body>
         <h1>Available routes:</h1>
-        <a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a>
-        <a href="/api/v1.0/stations">/api/v1.0/stations</a>
-        <a href="/api/v1.0/tobs">/api/v1.0/tobs</a>
-        <a href="/api/v1.0/<start>">/api/v1.0/<start></a>
-        <a href="/api/v1.0/<start>/<end>">/api/v1.0/<start>/<end></a>
+
+        <li><a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a></li>
+        <li><a href="/api/v1.0/stations">/api/v1.0/stations</a></li>
+        <li><a href="/api/v1.0/tobs">/api/v1.0/tobs</a></li>
+        <li><a href="/api/v1.0/<start>">/api/v1.0/<start></a></li>
+        <li><a href="/api/v1.0/<start>/<end>">/api/v1.0/<start>/<end></a></li>
     </body>
-    </html>
+    </html
 """
+   
     return routes   
+
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()
-    one_year_ago= dt.datetime.strptime(most_recent_date,"%Y-%m-%d") - dt.timedelta(days=365)
+    one_year_ago= dt.datetime.strptime(most_recent_date[0],"%Y-%m-%d") - dt.timedelta(days=365)
     precipitation_data=session.query(measurement.date, measurement.prcp).filter(measurement.date >= one_year_ago).all()
     
-    #covertquery to dictionary # dict={newkey,value for .......}
+    #covertquery to dictionary 
     perc_data= {date: prcp for date, prcp in precipitation_data}
-
     return jsonify(perc_data)
 
-    
+@app.route(/api/v1.0/stations)
 
 
-
-    
 
 if __name__=='__main__':
     app.run(debug=True)
