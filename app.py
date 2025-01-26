@@ -79,7 +79,26 @@ def stations():
 
     return jsonify(station_data_list)
 
+@app.route("/api/v1.0/tobs")
+def tobs():
+    most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()
+    one_year_ago= dt.datetime.strptime(most_recent_date[0],"%Y-%m-%d") - dt.timedelta(days=365)
+    station_activity=session.query(measurement.station,func.count())\
+        .group_by(measurement.station).order_by(func.count(measurement.station).desc()).all()
+    station_active_date_temp=session.query(measurement.date, measurement.tobs)\
+        .filter(measurement.station == station_activity[0][0], measurement.date >= one_year_ago).all()
+    #Only putting temparute in list becuase that is the only variable asked in the instruction
+    templist= [tobs[1] for tobs in station_active_date_temp]
+
+    return jsonify(templist)
+
+    
+    
+
+
+
 
 
 if __name__=='__main__':
     app.run(debug=True)
+
