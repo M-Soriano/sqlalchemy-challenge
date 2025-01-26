@@ -13,20 +13,20 @@ from sqlalchemy import create_engine, func
 #################################################
 # Database Setup
 #################################################
-#engine= create_engine('sqlite:///hawaii.sqlite')
+engine= create_engine('sqlite:///hawaii.sqlite')
 
 
 # reflect an existing database into a new model
-#Base= automap_base()
+Base= automap_base()
 # reflect the tables
-#Base.prepare(autoload_with=engine)
+Base.prepare(autoload_with=engine)
 
 # Save references to each table
-#measurements=Base.classes.measurement
-#stations=Base.classes.station
+measurement=Base.classes.measurement
+station=Base.classes.station
 
 # Create our session (link) from Python to the DB
-#ession=Session(engine)
+session=Session(engine)
 
 #################################################
 # Flask Setup
@@ -59,7 +59,20 @@ def root():#helpful https://python-web.teclado.com/section07/lectures/02_render_
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
-    return(f"works I guess")
+    most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()
+    one_year_ago= dt.datetime.strptime(most_recent_date,"%Y-%m-%d") - dt.timedelta(days=365)
+    precipitation_data=session.query(measurement.date, measurement.prcp).filter(measurement.date >= one_year_ago).all()
+    
+    #covertquery to dictionary # dict={newkey,value for .......}
+    perc_data= {date: prcp for date, prcp in precipitation_data}
+
+    return jsonify(perc_data)
+
+    
+
+
+
+    
 
 if __name__=='__main__':
     app.run(debug=True)
