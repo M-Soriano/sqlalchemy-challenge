@@ -61,9 +61,9 @@ def root():#helpful https://python-web.teclado.com/section07/lectures/02_render_
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
-    most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()
-    one_year_ago= dt.datetime.strptime(most_recent_date[0],"%Y-%m-%d") - dt.timedelta(days=365)
-    precipitation_data=session.query(measurement.date, measurement.prcp).filter(measurement.date >= one_year_ago).all()
+    most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()#-------
+    one_year_ago= dt.datetime.strptime(most_recent_date[0],"%Y-%m-%d") - dt.timedelta(days=365)#------
+    precipitation_data=session.query(measurement.date, measurement.prcp).filter(measurement.date >= one_year_ago).all()#-----
 
     session.close()
     
@@ -74,8 +74,17 @@ def precipitation():
 @app.route('/api/v1.0/stations')
 def stations():
     stationlist=session.query((func.distinct(station.station))).all()
+    session.close()
     #converting to list
-    station_data_list=[station[0] for station in stationlist]
+    station_data_list=[]
+    for station, name, latitude, longitude, elevation  in stationlist:
+        station_dict={}
+        station_dict["station"]= station
+        station_dict['name']=name
+        station_dict['latitude']=latitude
+        station_dict['longitude']=longitude
+        station_dict['elevation']=elevation
+        station_data_list.append(station_dict)
 
     return jsonify(station_data_list)
 
@@ -87,10 +96,22 @@ def tobs():
         .group_by(measurement.station).order_by(func.count(measurement.station).desc()).all()
     station_active_date_temp=session.query(measurement.date, measurement.tobs)\
         .filter(measurement.station == station_activity[0][0], measurement.date >= one_year_ago).all()
+    session.close()
     #Only putting temparute in list becuase that is the only variable asked in the instruction
-    templist= [tobs[1] for tobs in station_active_date_temp]
+    templist= []
+    for date, tobs in station_active_date_temp:
+        date_tobs_dict={}
+        date_tobs_dict['date'] = date
+        date_tobs_dict['tobs'] = tobs
+        templist.append(date_tobs_dict)
 
     return jsonify(templist)
+
+@app.route("/api/v1.0/<start>")
+def start(start):
+    canonicalized= start.strftime("%Y-%m-%d")
+    for date in measurement:
+        date_search = session.query()
 
     
     
