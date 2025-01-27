@@ -3,6 +3,7 @@ import numpy as np
 import datetime as dt
 import pandas as pd
 import sqlalchemy
+
 from flask import Flask, jsonify
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
@@ -31,14 +32,16 @@ session=Session(bind=engine)
 most_recent_date=session.query(measurement.date).order_by(measurement.date.desc()).first()[0]
 
 oldest_date=session.query(measurement.date).order_by(measurement.date.desc()).all()[-1][0]
-
+session.close()
 
 def one_year_ago_func(date):
     one_year= dt.datetime.strptime(date,"%Y-%m-%d") - dt.timedelta(days=365)
+    session.close()
     return (one_year)
 
 def precipitation_data_func(date):
     filter_data =session.query(measurement.date, measurement.prcp).filter(measurement.date >= date).all()
+    session.close()
     return (filter_data)
 
 def datesearch_func(start,end):
@@ -48,6 +51,7 @@ def datesearch_func(start,end):
             func.min(measurement.tobs), 
             func.max(measurement.tobs),
             func.avg(measurement.tobs)).filter(measurement.date >= start)
+        session.close()
         return date_search
     
     else:
@@ -70,17 +74,10 @@ def checking_func(dates):
         return dates
     
 
-        
-
-
-
-
 #################################################
 # Flask Setup
 #################################################
 app = Flask(__name__)
-
-
 
 #################################################
 # Flask Routes
